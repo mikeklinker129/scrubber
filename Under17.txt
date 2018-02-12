@@ -1,0 +1,1 @@
+['ADT', 'AES', 'CTL', 'CHK', 'CNX', 'DO', 'ENDP', 'ESV', 'F', 'FOSL', 'FTR', 'GME', 'GE', 'GNW', 'HBAN', 'KIM', 'MNK', 'MRO', 'NAVI', 'NWSA', 'NWS', 'PBI', 'RRC', 'SWN', 'SE', 'TGNA', 'RIG', 'UA']

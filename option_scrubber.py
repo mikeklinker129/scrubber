@@ -2,15 +2,15 @@ from wallstreet import Stock, Call, Put
 import numpy as np
 from datetime import datetime
 
-EXP_LOWER = 30 #days
-EXP_HIGH = 200 #days
+EXP_LOWER = 30.0 #days
+EXP_HIGH = 200.0 #days
 PRICE_MAX = 1.0 # dollars per share
 VOL_LOWER = 100 #number
 
 
 
 
-tickers = ['GOOG','AAPL','SPY']
+tickers = ['SPY']
 
 #This will become the master list of options that fit our criteria. 
 candidates = []
@@ -35,10 +35,15 @@ for symb in tickers:
 		# Determine how far into the future (in day) the option expires
 		dt = (exp_dt-now).total_seconds()/3600/24
 
-		# If this expiration date is too soon or too far away, move on.  
-		if EXP_LOWER < dt and dt < EXP_HIGH:
+		# If this expiration date is too soon or too far away, move on. 
+		if EXP_LOWER > dt:
+			continue
+		if EXP_HIGH < dt:
 			continue
 
+
+
+		print(exp)
 		# Create the call object for this desired expiration date. 
 		c_iter = Call(symb, source="yahoo", d=exp_dt.day, m=exp_dt.month, y=exp_dt.year)
 
@@ -46,9 +51,15 @@ for symb in tickers:
 		c_strikes = c_iter.strikes
 		for strike in c_strikes:
 
+
 			# If this call is in the money, we arent interested. 
 			if strike < under_price:
 				continue
+
+			if strike % 1 != 0:
+				continue	
+
+			print(strike)
 
 			# Assign our call the desired strike. 	
 			c_iter.set_strike(strike)
@@ -68,6 +79,8 @@ for symb in tickers:
 			if last_price > PRICE_MAX:
 				continue
 
+			print("Found One!")
+
 			# If we get here, we have a candidate. 
 			# Create a dictionary with the desired information.
 			option = {}
@@ -82,10 +95,12 @@ for symb in tickers:
 
 			candidates.append(option)
 
+			break
+
 	# Same process but for puts. 
 	put = Put(sumb, source='yahoo')
 	p_expires = put.expirations
-
+	print("PUTS")
 	under_price = float(put.underlying.price)
 
 	now = datetime.now()
@@ -100,6 +115,8 @@ for symb in tickers:
 		# If this expiration date is too soon or too far away, move on.  
 		if EXP_LOWER < dt and dt < EXP_HIGH:
 			continue
+
+		print(exp)
 
 		# Create the put object for this desired expiration date. 
 		p_iter = Put(symb, source="yahoo", d=exp_dt.day, m=exp_dt.month, y=exp_dt.year)
