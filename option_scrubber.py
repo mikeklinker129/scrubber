@@ -18,7 +18,8 @@ candidates = []
 for symb in tickers:
 	print(symb)
 
-	call = Call(symb, source='yahoo')
+	# call = Call(symb, source='yahoo')
+	call = Call(symb, source="google")
 	c_expires = call.expirations
 	c_strikes = call.strikes
 

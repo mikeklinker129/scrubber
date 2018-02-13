@@ -3,17 +3,23 @@ import numpy as np
 from datetime import datetime
 import ast 
 
-EXP_LOWER = 5.0 #days
+EXP_LOWER = 14.0 #days
 EXP_HIGH = 45.0 #days
 VOL_LOWER = 20 #number
+OI_LOWER = 5 #number
 MAX_UNDERLYING = 20.0 # Max price per share of the underlying stock
-PROFIT_MIN = 5.0 
+PROFIT_MIN = 5.0 # Percent. How much $$ you gunna make off your investment. 
+MOVEMENT_THRES = 12.0 # Percent. How many % the stock has to move to hit the strike price. 
 
 def get_symbols():
     symbols=[]
     with open('russel2000.txt','r') as f:
         symbols = [line.strip() for line in f]
     return symbols
+
+def print_candidate(i):
+    print("Symb: %s Underlying: %.2f Days: %i  Price: %.2f Bid: %.2f Ask %.2f Strike: %.1f  Extrinsic: %.2f OTM: %.1f Percent: %.2f" %(i['symb'],i['underlying'],i['days'],i['last_price'],i['bid'],i['ask'],i['strike'],i['extrinsic'],i['otm_percent'],i['percent']))
+
 
 
 tickers = ['AMD','F']
@@ -24,9 +30,10 @@ with open('Under17.txt','r') as f:
 tickers = ast.literal_eval(t_str)
 # tickers = get_symbols()
 
+tickers.append('AMD')
+
 #This will become the master list of options that fit our criteria. 
 candidates = []
-tickers_17 = []
 
 for symb in tickers:
     print(symb)
@@ -43,8 +50,6 @@ for symb in tickers:
 
     if under_price>MAX_UNDERLYING:
         continue
-
-    tickers_17.append(symb)
 
     #Set the expiration date first
     # Start at least EXP_LOWER and end EXP_HIGH
@@ -88,6 +93,7 @@ for symb in tickers:
             # print(atm_percent)
 
             volume = c_iter.volume
+            oi = c_iter.open_interest
             last_price = c_iter.price
             last_price = c_iter.bid
 
@@ -99,12 +105,18 @@ for symb in tickers:
             if profit_potential<PROFIT_MIN:
                 continue
 
+            if otm_percent < MOVEMENT_THRES:
+                continue
+
             # if the volume is below thres, toss. 
             if volume < VOL_LOWER:
                 continue
 
+            if oi < OI_LOWER:
+                continue
 
-            print("Found One!  Profit: %.4f percent. Strike: %.2f, Last: %.2f, Under: %.2f, EX: %.2f" %(profit_potential, strike, last_price, under_price, extrinsic))
+
+            # print("Found One!  Profit: %.4f percent. Strike: %.2f, Last: %.2f, Under: %.2f, EX: %.2f" %(profit_potential, strike, last_price, under_price, extrinsic))
 
             # If we get here, we have a candidate. 
             # Create a dictionary with the desired information.
@@ -125,6 +137,8 @@ for symb in tickers:
 
             candidates.append(option)
 
+            print_candidate(option)
+
 
 #Use this block for saving stock lists. 
 # with open('Under20_russel.txt','w') as w:
@@ -133,7 +147,5 @@ for symb in tickers:
 print('\n\n\n\n\n\n\n')
 
 for i in candidates:
-    print("Symb: %s Underlying: %.2f Days: %i  Price: %.2f Bid: %.2f Strike: %.1f  Extrinsic: %.2f OTM: %.1f Percent: %.2f" %(i['symb'],i['underlying'],i['days'],i['last_price'],i['bid'],i['strike'],i['extrinsic'],i['otm_percent'],i['percent']))
-
-
+    print_candidate(i)
 
